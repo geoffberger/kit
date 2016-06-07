@@ -39,8 +39,9 @@ var (
 	ErrTwoZeroes = errors.New("can't sum two zeroes")
 
 	// ErrIntOverflow protects the Add method. Strictly speaking, it doesn't
-	// indicate a misbehaving service, but we return it directly in endpoints to
-	// illustrate the difference between the two classes of errors.
+	// indicate a misbehaving service, but we (arbitrarily) decide that it does
+	// and return it directly in endpoints to illustrate the difference between
+	// the two classes of errors.
 	ErrIntOverflow = errors.New("integer overflow")
 
 	// ErrMaxSizeExceeded protects the Concat method. Unlike ErrIntOverflow,
@@ -48,6 +49,24 @@ var (
 	// and so it will be encoded in the response struct.
 	ErrMaxSizeExceeded = errors.New("result exceeds maximum size")
 )
+
+// These annoying helper functions are required to translate Go error types to
+// and from strings, which is the type we use in our IDLs to represent errors.
+// There is special casing to treat empty strings as nil errors.
+
+func str2err(s string) error {
+	if s == "" {
+		return nil
+	}
+	return errors.New(s)
+}
+
+func err2str(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
+}
 
 // NewBasicService returns a naïve, stateless implementation of Service.
 func NewBasicService() Service {

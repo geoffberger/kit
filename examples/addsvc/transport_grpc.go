@@ -4,8 +4,6 @@ package addsvc
 // It utilizes the transport/grpc.Server.
 
 import (
-	"errors"
-
 	stdopentracing "github.com/opentracing/opentracing-go"
 	"golang.org/x/net/context"
 
@@ -117,18 +115,4 @@ func EncodeGRPCSumRequest(_ context.Context, request interface{}) (interface{}, 
 func EncodeGRPCConcatRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(concatRequest)
 	return &pb.ConcatRequest{A: req.A, B: req.B}, nil
-}
-
-func str2err(s string) error {
-	if s == "" {
-		return nil
-	}
-	return errors.New(s)
-}
-
-func err2str(err error) string {
-	if err == nil {
-		return ""
-	}
-	return err.Error()
 }
