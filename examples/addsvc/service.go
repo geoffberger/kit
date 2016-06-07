@@ -19,14 +19,33 @@ type Service interface {
 	Concat(ctx context.Context, a, b string) (string, error)
 }
 
+// How should endpoints encode business-domain errors like these? Should the
+// endpoint return the error directly as the error return value? Or should we
+// define an Err field in our response struct and put the error there?
+//
+// To be clear, you can make it work either way. But returning business-domain
+// errors directly in the error return value causes them to "count" for
+// transport-domain middleware concerns, like circuit breakers.
+//
+// To decide how to return an error, ask yourself: if the server returns lots of
+// this error, is it misbehaving, or totally fine? If it's misbehaving, it may
+// make sense to return directly; if it's fine, then put it in the response
+// struct.
+
 var (
-	// ErrTwoZeroes is an arbitrary business rule for the Add method.
+	// ErrTwoZeroes is an arbitrary business rule for the Add method. It doesn't
+	// indicate a misbehaving service, so it will be encoded in the response
+	// struct.
 	ErrTwoZeroes = errors.New("can't sum two zeroes")
 
-	// ErrIntOverflow protects the Add method.
+	// ErrIntOverflow protects the Add method. Strictly speaking, it doesn't
+	// indicate a misbehaving service, but we return it directly in endpoints to
+	// illustrate the difference between the two classes of errors.
 	ErrIntOverflow = errors.New("integer overflow")
 
-	// ErrMaxSizeExceeded protects the Concat method.
+	// ErrMaxSizeExceeded protects the Concat method. Unlike ErrIntOverflow,
+	// we've (arbitrarily) decided it doesn't indicate a misbehaving service,
+	// and so it will be encoded in the response struct.
 	ErrMaxSizeExceeded = errors.New("result exceeds maximum size")
 )
 
